@@ -1,0 +1,4 @@
+*.db
+*.log
+github_token
+__pycache__/
