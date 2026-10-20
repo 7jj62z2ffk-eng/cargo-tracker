@@ -1,0 +1,402 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>嘉旅供应链 · 货物跟踪</title>
+<style>
+  :root{
+    --bg:#f5f7fa; --panel:#ffffff; --border:#e3e8ef; --text:#1f2937;
+    --muted:#6b7280; --brand:#0b5fa5; --brand-d:#08487d;
+    --blue:#2563eb; --gray:#6b7280; --teal:#0d9488; --green:#16a34a; --red:#dc2626;
+    --shadow:0 1px 3px rgba(16,24,40,.08),0 1px 2px rgba(16,24,40,.06);
+  }
+  *{box-sizing:border-box}
+  body{margin:0;font-family:-apple-system,BlinkMacSystemFont,"Segoe UI","PingFang SC","Microsoft YaHei",sans-serif;
+    background:var(--bg);color:var(--text);font-size:14px;line-height:1.5}
+  header{background:linear-gradient(135deg,var(--brand),var(--brand-d));color:#fff;padding:14px 22px;
+    display:flex;align-items:center;justify-content:space-between;box-shadow:var(--shadow)}
+  header h1{font-size:17px;margin:0;font-weight:600;letter-spacing:.5px}
+  header .sub{font-size:12px;opacity:.85;margin-top:2px}
+  .hbtns{display:flex;gap:8px}
+  .hbtns button{background:rgba(255,255,255,.15);border:1px solid rgba(255,255,255,.3);color:#fff;
+    padding:6px 12px;border-radius:6px;cursor:pointer;font-size:13px}
+  .hbtns button:hover{background:rgba(255,255,255,.28)}
+  .wrap{max-width:1180px;margin:18px auto;padding:0 18px}
+  .card{background:var(--panel);border:1px solid var(--border);border-radius:10px;box-shadow:var(--shadow);padding:16px;margin-bottom:16px}
+  .card h2{font-size:14px;margin:0 0 12px;font-weight:600;color:var(--brand-d)}
+  .grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(160px,1fr));gap:10px}
+  label{display:block;font-size:12px;color:var(--muted);margin-bottom:3px}
+  input,select,textarea{width:100%;padding:8px 10px;border:1px solid var(--border);border-radius:6px;
+    font-size:13px;font-family:inherit;background:#fff;color:var(--text)}
+  textarea{resize:vertical;min-height:38px}
+  .row-actions{display:flex;gap:8px;margin-top:12px;align-items:center;flex-wrap:wrap}
+  .btn{background:var(--brand);color:#fff;border:none;padding:8px 16px;border-radius:6px;cursor:pointer;font-size:13px;font-weight:500}
+  .btn:hover{background:var(--brand-d)}
+  .btn.ghost{background:#fff;color:var(--brand);border:1px solid var(--brand)}
+  .btn.sm{padding:5px 10px;font-size:12px}
+  .btn.danger{background:#fff;color:var(--red);border:1px solid #f3c0c0}
+  .quick{display:flex;gap:8px;flex-wrap:wrap;align-items:flex-end}
+  .quick input{flex:1;min-width:220px}
+  table{width:100%;border-collapse:collapse;font-size:13px}
+  th,td{text-align:left;padding:10px 8px;border-bottom:1px solid var(--border);vertical-align:middle}
+  th{color:var(--muted);font-weight:600;font-size:12px;background:#fafbfc}
+  tbody tr:hover{background:#f8fafc;cursor:pointer}
+  .badge{display:inline-block;padding:2px 9px;border-radius:20px;font-size:12px;font-weight:600;color:#fff;white-space:nowrap}
+  .b-blue{background:var(--blue)} .b-gray{background:var(--gray)} .b-teal{background:var(--teal)}
+  .b-green{background:var(--green)} .b-red{background:var(--red)}
+  .mono{font-family:ui-monospace,SFMono-Regular,Menlo,monospace;font-size:12px}
+  .muted{color:var(--muted);font-size:12px}
+  .empty{padding:30px;text-align:center;color:var(--muted)}
+  .modal-bg{position:fixed;inset:0;background:rgba(15,23,42,.45);display:none;align-items:flex-start;
+    justify-content:center;padding:40px 16px;overflow:auto;z-index:50}
+  .modal-bg.show{display:flex}
+  .modal{background:#fff;border-radius:12px;max-width:760px;width:100%;box-shadow:0 20px 60px rgba(0,0,0,.25);overflow:hidden}
+  .modal-head{padding:14px 18px;border-bottom:1px solid var(--border);display:flex;justify-content:space-between;align-items:center;background:#fafbfc}
+  .modal-head h3{margin:0;font-size:15px}
+  .modal-body{padding:18px;max-height:70vh;overflow:auto}
+  .close{cursor:pointer;border:none;background:none;font-size:20px;color:var(--muted);line-height:1}
+  .tl{position:relative;margin:6px 0 0 6px;padding-left:18px;border-left:2px solid var(--border)}
+  .tl-item{position:relative;padding:0 0 14px}
+  .tl-item::before{content:"";position:absolute;left:-25px;top:3px;width:10px;height:10px;border-radius:50%;
+    background:var(--brand);border:2px solid #fff;box-shadow:0 0 0 2px var(--border)}
+  .tl-item.planned::before{background:var(--gray)}
+  .tl-item.done::before{background:var(--green)}
+  .tl-item.exc::before{background:var(--red)}
+  .kv{display:grid;grid-template-columns:auto 1fr;gap:4px 12px;font-size:13px;margin-bottom:14px}
+  .kv dt{color:var(--muted)}
+  .kv dd{margin:0}
+  .linkbtns{display:flex;gap:8px;flex-wrap:wrap;margin:10px 0 4px}
+  details{margin-top:12px;border:1px solid var(--border);border-radius:6px;padding:6px 10px;background:#fafbfc}
+  summary{cursor:pointer;font-size:12px;color:var(--muted)}
+  pre{white-space:pre-wrap;word-break:break-word;font-size:11px;background:#0f172a;color:#e2e8f0;padding:10px;border-radius:6px;overflow:auto;max-height:300px}
+  .toast{position:fixed;bottom:20px;left:50%;transform:translateX(-50%);background:#1f2937;color:#fff;
+    padding:10px 18px;border-radius:8px;font-size:13px;opacity:0;transition:opacity .25s;z-index:99;max-width:80%}
+  .toast.show{opacity:1}
+  .toast.err{background:var(--red)}
+  .pill{font-size:11px;padding:1px 7px;border-radius:10px;background:#eef2f7;color:var(--muted);margin-left:6px}
+</style>
+</head>
+<body>
+<header>
+  <div>
+    <h1>嘉旅供应链 · 货物跟踪</h1>
+    <div class="sub">EXCELLENT VOYAGE INTERNATIONAL LOGISTICS — 集装箱 / 提单 / 订舱 全程跟踪</div>
+  </div>
+  <div class="hbtns">
+    <button onclick="openSettings()">⚙ 设置</button>
+    <button onclick="openHelp()">？ 使用说明</button>
+  </div>
+</header>
+
+<div class="wrap">
+  <!-- 快速查询（不入库） -->
+  <div class="card">
+    <h2>快速查询（不保存）</h2>
+    <div class="quick">
+      <div style="flex:2;min-width:220px">
+        <label>箱号 / 提单号 / 订舱号</label>
+        <input id="q_ref" placeholder="例如 MSKU1234567 或 提单号 / 订舱号">
+      </div>
+      <div style="flex:1;min-width:140px">
+        <label>类型</label>
+        <select id="q_kind">
+          <option value="">自动识别</option>
+          <option value="container_id">集装箱</option>
+          <option value="bill_of_lading">提单</option>
+          <option value="booking_number">订舱</option>
+        </select>
+      </div>
+      <button class="btn" onclick="quickTrack()">查询</button>
+    </div>
+    <div id="q_result" style="margin-top:12px"></div>
+  </div>
+
+  <!-- 新增货物 -->
+  <div class="card">
+    <h2>登记货物（入库长期跟踪）</h2>
+    <div class="grid">
+      <div><label>箱号 / 提单号 / 订舱号 *</label><input id="f_no" placeholder="MSKU1234567"></div>
+      <div><label>类型</label>
+        <select id="f_kind">
+          <option value="container">集装箱</option>
+          <option value="bl">提单</option>
+          <option value="booking">订舱</option>
+        </select>
+      </div>
+      <div><label>船公司（留空自动识别）</label><select id="f_carrier"><option value="">自动识别</option></select></div>
+      <div><label>客户 / 备注名</label><input id="f_customer" placeholder="客户或内部简称"></div>
+      <div><label>起运港</label><input id="f_origin" placeholder="如 NANSHA / DJIBOUTI"></div>
+      <div><label>目的港</label><input id="f_dest" placeholder="如 LOS ANGELES"></div>
+    </div>
+    <div style="margin-top:10px"><label>备注</label><textarea id="f_notes" placeholder="DG申报 / 批次 / 特殊要求等"></textarea></div>
+    <div class="row-actions">
+      <button class="btn" onclick="addShipment()">登记并跟踪</button>
+      <button class="btn ghost" onclick="addShipmentOnly()">仅登记</button>
+      <span class="muted" id="add_hint"></span>
+    </div>
+  </div>
+
+  <!-- 列表 -->
+  <div class="card">
+    <h2>在跟踪清单 <span class="pill" id="cnt">0</span></h2>
+    <div id="list">
+      <div class="empty">暂无登记。先在上方登记一个箱号，或点「登记并跟踪」拉取实时状态。</div>
+    </div>
+  </div>
+</div>
+
+<!-- 详情弹窗 -->
+<div class="modal-bg" id="detailModal">
+  <div class="modal">
+    <div class="modal-head"><h3 id="d_title">货物详情</h3><button class="close" onclick="closeModal('detailModal')">×</button></div>
+    <div class="modal-body" id="d_body"></div>
+  </div>
+</div>
+
+<!-- 设置弹窗 -->
+<div class="modal-bg" id="setModal">
+  <div class="modal">
+    <div class="modal-head"><h3>设置</h3><button class="close" onclick="closeModal('setModal')">×</button></div>
+    <div class="modal-body">
+      <dl class="kv">
+        <dt style="grid-column:1/3">API Key（可选）</dt>
+        <dd style="grid-column:1/3">
+          <input id="cfg_key" placeholder="在 trackingmcp.com/mcp 免费申请，形如 tmcp_...">
+          <div class="muted" style="margin-top:4px">不填也能用「公开免密端点」查 229 家船公司；填了可解锁组合跟踪 / 滞箱预警与更高限额。</div>
+        </dd>
+        <dt style="grid-column:1/3">自动刷新（分钟，0=关闭）</dt>
+        <dd style="grid-column:1/3"><input id="cfg_refresh" type="number" min="0" value="0" style="max-width:160px"></dd>
+      </dl>
+      <div class="row-actions">
+        <button class="btn" onclick="saveConfig()">保存设置</button>
+        <button class="btn ghost" onclick="closeModal('setModal')">取消</button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- 帮助弹窗 -->
+<div class="modal-bg" id="helpModal">
+  <div class="modal">
+    <div class="modal-head"><h3>使用说明</h3><button class="close" onclick="closeModal('helpModal')">×</button></div>
+    <div class="modal-body" style="font-size:13px;line-height:1.7">
+      <p><b>这是什么</b>：本地自托管的货物跟踪工具，零外部依赖，数据存在本机 <span class="mono">cargo.db</span>，可长期使用、不上传第三方。</p>
+      <p><b>怎么启动</b>：在 <span class="mono">cargo-tracker/</span> 目录执行 <span class="mono">python3 app.py</span>（默认端口 8765），浏览器打开 <span class="mono">http://127.0.0.1:8765</span>。停止按 Ctrl+C。</p>
+      <p><b>怎么查</b>：</p>
+      <ul>
+        <li><b>快速查询</b>：输入箱号/提单/订舱号直接查，不入库。</li>
+        <li><b>登记货物</b>：填箱号+类型（+客户/港口/备注），「登记并跟踪」会拉实时状态并缓存轨迹；列表里点任意行看时间线。</li>
+        <li>箱号前 4 位会自动识别船公司（Maersk / MSC / CMA CGM / COSCO / Hapag-Lloyd / ZIM 等）。</li>
+      </ul>
+      <p><b>数据来源</b>：TrackingMCP 公开端点（229 家船公司 DCSA 标准数据）。「官网」按钮直跳船司官网跟踪页，搜索按钮兜底。</p>
+      <p class="muted">注：公开端点有速率限制；需要组合跟踪、滞箱费预警、历史留存建议申请免费 key 填入设置。</p>
+    </div>
+  </div>
+</div>
+
+<div class="toast" id="toast"></div>
+
+<script>
+const API = "";
+function toast(msg, err=false){const t=document.getElementById('toast');t.textContent=msg;t.className='toast show'+(err?' err':'');setTimeout(()=>t.className='toast',2600);}
+function closeModal(id){document.getElementById(id).classList.remove('show');}
+function esc(s){return (s==null?'':String(s)).replace(/[&<>"]/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]));}
+const STATUS_CLASS={blue:'b-blue',gray:'b-gray',teal:'b-teal',green:'b-green',red:'b-red'};
+function badge(status,label,exc){
+  let cls='gray';
+  if(exc) cls='red';
+  else if(status==='in_transit') cls='blue';
+  else if(status==='delivered'||status==='returned_empty') cls='green';
+  else if(status==='available'||status==='discharged') cls='teal';
+  else if(status==='planned') cls='gray';
+  return `<span class="badge ${STATUS_CLASS[cls]}">${esc(label||status||'未知')}</span>`;
+}
+
+async function loadCarriers(){
+  try{const r=await fetch(API+'/api/carriers');const c=await r.json();
+    const sel=document.getElementById('f_carrier');
+    Object.entries(c).forEach(([scac,v])=>{const o=document.createElement('option');o.value=scac;o.textContent=`${v.name} (${scac})`;sel.appendChild(o);});
+  }catch(e){}
+}
+async function loadConfig(){
+  try{const r=await fetch(API+'/api/config');const c=await r.json();
+    if(c.api_key)document.getElementById('cfg_key').value=c.api_key;
+    if(c.refresh_minutes)document.getElementById('cfg_refresh').value=c.refresh_minutes;
+  }catch(e){}
+}
+async function saveConfig(){
+  const key=document.getElementById('cfg_key').value.trim();
+  const ref=document.getElementById('cfg_refresh').value;
+  try{await fetch(API+'/api/config',{method:'POST',headers:{'Content-Type':'application/json'},
+    body:JSON.stringify({api_key:key,refresh_minutes:ref})});
+    toast('设置已保存');closeModal('setModal');startAuto();
+  }catch(e){toast('保存失败：'+e,true);}
+}
+function openSettings(){loadConfig();document.getElementById('setModal').classList.add('show');}
+function openHelp(){document.getElementById('helpModal').classList.add('show');}
+
+async function loadShipments(){
+  try{const r=await fetch(API+'/api/shipments');const rows=await r.json();
+    document.getElementById('cnt').textContent=rows.length;
+    const box=document.getElementById('list');
+    if(!rows.length){box.innerHTML='<div class="empty">暂无登记。先在上方登记一个箱号，或点「登记并跟踪」拉取实时状态。</div>';return;}
+    let h='<table><thead><tr><th>箱号/单号</th><th>类型</th><th>船公司</th><th>客户</th><th>状态</th><th>ETA</th><th>船名</th><th>更新</th><th></th></tr></thead><tbody>';
+    rows.forEach(s=>{
+      const exc=s.last_status==='exception';
+      const st=s.last_status||'';
+      h+=`<tr onclick="openDetail(${s.id})">
+        <td class="mono">${esc(s.tracking_no)}</td>
+        <td>${esc({container:'集装箱',bl:'提单',booking:'订舱'}[s.kind]||s.kind)}</td>
+        <td>${esc(s.carrier_name||s.carrier_code||'-')}</td>
+        <td>${esc(s.customer||'-')}</td>
+        <td>${badge(st, st?'': '未跟踪', exc)}</td>
+        <td class="mono">${esc(s.last_eta||'-')}</td>
+        <td>${esc(s.last_vessel||'-')}</td>
+        <td class="muted">${esc(s.last_updated||'-')}</td>
+        <td><button class="btn sm danger" onclick="event.stopPropagation();delShip(${s.id})">删除</button></td>
+      </tr>`;
+    });
+    h+='</tbody></table>';box.innerHTML=h;
+  }catch(e){document.getElementById('list').innerHTML='<div class="empty">加载失败：'+e+'</div>';}
+}
+
+async function addShipment(track=true){
+  const no=document.getElementById('f_no').value.trim();
+  if(!no){toast('请输入箱号/单号',true);return;}
+  const body={tracking_no:no,kind:document.getElementById('f_kind').value,
+    carrier_code:document.getElementById('f_carrier').value||null,
+    customer:document.getElementById('f_customer').value.trim(),
+    origin:document.getElementById('f_origin').value.trim(),
+    destination:document.getElementById('f_dest').value.trim(),
+    notes:document.getElementById('f_notes').value.trim()};
+  const hint=document.getElementById('add_hint');hint.textContent='处理中…';
+  try{
+    const r=await fetch(API+'/api/shipments',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify(body)});
+    const s=await r.json();
+    if(track){
+      const t=await fetch(API+'/api/shipments/'+s.id+'/track',{method:'POST'});
+      const res=await t.json();
+      if(!res.ok){hint.textContent='已登记，但实时查询失败：'+(res.error||'');}
+      else hint.textContent='';
+    }
+    ['f_no','f_customer','f_origin','f_dest','f_notes'].forEach(id=>document.getElementById(id).value='');
+    await loadShipments();
+    toast(track?'已登记并拉取状态':'已登记');
+  }catch(e){hint.textContent='';toast('操作失败：'+e,true);}
+}
+function addShipmentOnly(){addShipment(false);}
+
+async function delShip(id){
+  if(!confirm('确认删除该跟踪记录？'))return;
+  try{await fetch(API+'/api/shipments/'+id,{method:'DELETE'});await loadShipments();toast('已删除');}
+  catch(e){toast('删除失败：'+e,true);}
+}
+
+async function openDetail(id){
+  try{
+    const r=await fetch(API+'/api/shipments/'+id);const s=await r.json();
+    let trackBtn=`<button class="btn sm" onclick="reTrack(${id})">刷新状态</button>`;
+    let body=`<dl class="kv">
+      <dt>单号</dt><dd class="mono">${esc(s.tracking_no)}</dd>
+      <dt>类型</dt><dd>${esc({container:'集装箱',bl:'提单',booking:'订舱'}[s.kind]||s.kind)}</dd>
+      <dt>船公司</dt><dd>${esc(s.carrier_name||s.carrier_code||'-')}</dd>
+      <dt>客户</dt><dd>${esc(s.customer||'-')}</dd>
+      <dt>起运/目的</dt><dd>${esc(s.origin||'-')} → ${esc(s.destination||'-')}</dd>
+      <dt>状态</dt><dd>${badge(s.last_status||'', s.last_status||'未跟踪', s.last_status==='exception')}</dd>
+      <dt>ETA</dt><dd class="mono">${esc(s.last_eta||'-')}${s.last_eta&&s.eta_is_estimated?' (预测)':''}</dd>
+      <dt>船名</dt><dd>${esc(s.last_vessel||'-')}</dd>
+      <dt>更新时间</dt><dd class="muted">${esc(s.last_updated||'-')}</dd>
+      <dt>备注</dt><dd>${esc(s.notes||'-')}</dd>
+    </dl>`;
+    // 深链
+    let links='';
+    if(s.events&&s.events.length){
+      const last=s.events[s.events.length-1];
+      if(last.raw&&last.raw.deep_link)links+=`<a class="btn sm" href="${esc(last.raw.deep_link)}" target="_blank">官网跟踪</a>`;
+      if(last.raw&&last.raw.search_link)links+=`<a class="btn sm ghost" href="${esc(last.raw.search_link)}" target="_blank">搜索兜底</a>`;
+    }
+    if(links)body+='<div class="linkbtns">'+links+'</div>';
+    // 时间线
+    if(s.events&&s.events.length){
+      body+='<h2 style="font-size:14px;margin:16px 0 6px">轨迹时间线</h2><div class="tl">';
+      s.events.forEach(ev=>{
+        let cls='';
+        if(ev.event_code&&['HOLD','DELAY','ROLLED','EXCEPTION','DEMURRAGE','DETENTION'].includes(ev.event_code))cls='exc';
+        else if(ev.actual===0)cls='planned';
+        else if(ev.actual===1)cls='done';
+        body+=`<div class="tl-item ${cls}">
+          <div><b>${esc(ev.event_time||'')}</b> <span class="mono muted">${esc(ev.event_code||'')}</span> ${ev.actual===0?'<span class="pill">计划</span>':''}</div>
+          <div>${esc(ev.description||'')}</div>
+          <div class="muted">${esc(ev.location||'')}</div>
+        </div>`;
+      });
+      body+='</div>';
+    } else {
+      body+='<p class="muted" style="margin-top:12px">暂无轨迹。点「刷新状态」拉取最新里程碑。</p>';
+    }
+    body+='<details><summary>原始 JSON</summary><pre>'+esc(JSON.stringify(s,null,2))+'</pre></details>';
+    document.getElementById('d_title').textContent='货物详情 · '+s.tracking_no;
+    document.getElementById('d_body').innerHTML=body;
+    document.getElementById('detailModal').classList.add('show');
+  }catch(e){toast('打开详情失败：'+e,true);}
+}
+async function reTrack(id){
+  try{const t=await fetch(API+'/api/shipments/'+id+'/track',{method:'POST'});const res=await t.json();
+    if(!res.ok){toast('刷新失败：'+(res.error||''),true);return;}
+    toast('状态已更新');openDetail(id);
+  }catch(e){toast('刷新失败：'+e,true);}
+}
+
+async function quickTrack(){
+  const ref=document.getElementById('q_ref').value.trim();
+  if(!ref){toast('请输入查询单号',true);return;}
+  const kind=document.getElementById('q_kind').value;
+  const box=document.getElementById('q_result');box.innerHTML='<div class="muted">查询中…</div>';
+  try{
+    const r=await fetch(API+'/api/track',{method:'POST',headers:{'Content-Type':'application/json'},
+      body:JSON.stringify({reference:ref,kind:kind||null})});
+    const res=await r.json();
+    if(!res.ok){box.innerHTML='<div class="muted">查询失败：'+(res.error||'')+'</div>';return;}
+    let h=`<div class="kv" style="margin-top:6px">
+      <dt>状态</dt><dd>${badge(res.status,res.status_label,res.is_exception)}</dd>
+      <dt>船公司</dt><dd>${esc(res.carrier_name||res.carrier_code||'-')}</dd>
+      <dt>ETA</dt><dd class="mono">${esc(res.eta||'-')}${res.eta_is_estimated?' (预测)':''}</dd>
+      <dt>航线</dt><dd>${esc(res.origin||'-')} → ${esc(res.destination||'-')}</dd>
+      <dt>船名</dt><dd>${esc(res.vessel_name||'-')}</dd>
+    </div>`;
+    let links='';
+    if(res.deep_link)links+=`<a class="btn sm" href="${esc(res.deep_link)}" target="_blank">官网跟踪</a>`;
+    if(res.search_link)links+=`<a class="btn sm ghost" href="${esc(res.search_link)}" target="_blank">搜索兜底</a>`;
+    if(links)h+='<div class="linkbtns">'+links+'</div>';
+    if(res.events&&res.events.length){
+      h+='<h2 style="font-size:14px;margin:14px 0 6px">轨迹时间线</h2><div class="tl">';
+      res.events.forEach(ev=>{
+        let cls=ev.actual===0?'planned':(ev.actual===1?'done':'');
+        if(ev.event_code&&['HOLD','DELAY','ROLLED','EXCEPTION','DEMURRAGE','DETENTION'].includes(ev.event_code))cls='exc';
+        h+=`<div class="tl-item ${cls}"><div><b>${esc(ev.event_time||'')}</b> <span class="mono muted">${esc(ev.event_code||'')}</span></div><div>${esc(ev.description||'')}</div><div class="muted">${esc(ev.location||'')}</div></div>`;
+      });
+      h+='</div>';
+    }
+    box.innerHTML=h;
+  }catch(e){box.innerHTML='<div class="muted">查询失败：'+e+'</div>';}
+}
+
+let autoTimer=null;
+function startAuto(){
+  if(autoTimer)clearInterval(autoTimer);
+  const m=parseInt(document.getElementById('cfg_refresh').value||'0');
+  if(m>0){autoTimer=setInterval(trackAll,m*60000);}
+}
+async function trackAll(){
+  try{const r=await fetch(API+'/api/shipments');const rows=await r.json();
+    for(const s of rows){try{await fetch(API+'/api/shipments/'+s.id+'/track',{method:'POST'});}catch(e){}}
+    loadShipments();
+  }catch(e){}
+}
+
+// init
+loadCarriers();loadShipments();loadConfig();
+</script>
+</body>
+</html>

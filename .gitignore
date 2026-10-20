@@ -1,0 +1,12 @@
+# 运行时生成的数据与日志（含已登记的货物、API key，不入库）
+cargo.db
+*.db
+server.log
+*.log
+
+# Python 缓存
+__pycache__/
+*.pyc
+.venv/
+venv/
+.env
